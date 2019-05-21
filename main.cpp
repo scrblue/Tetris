@@ -764,6 +764,7 @@ int main()
 	std::vector<block> decomposedTetrominos;
 	std::vector<tetromino> tetrominoList;
 	bool isPlaying = true;
+	int score = 0;
 
 	//Random number stuff
 	std::random_device rd;
@@ -872,15 +873,57 @@ int main()
 				tetromino newTet(randomPiece(generator));
 				tetrominoList.push_back(newTet);
 			}
+			
+			//Loss checking
+			for (int i = 0; i < decomposedTetrominos.size(); i++)
+			{
+				if (decomposedTetrominos[i].returnPosition().x == numColumns / 2 && decomposedTetrominos[i].returnPosition().y == 0)
+				{
+					score = 0;
+					decomposedTetrominos.clear();
+				}
+			}
+
+			//Line checking
+
+			std::vector<int> linesCleared;
 
 			for (int i = 0; i < numRows; i++)
 			{
 				if (isRowComplete(decomposedTetrominos, i))
 				{
-					decomposedTetrominos = clearRow(decomposedTetrominos, i);
+					linesCleared.push_back(i);
 				}
 			}
+
+			if (linesCleared.size() == 0)
+			{
+				//This will be true for the majority of the game so I am including it as the first of this if else-if change to save processing time
+			}
+			else if (linesCleared.size() == 1)
+			{
+				score += 40;
+			}
+			else if (linesCleared.size() == 2)
+			{
+				score += 100;
+			}
+			else if (linesCleared.size() == 3)
+			{
+				score += 300;
+			}
+			else if (linesCleared.size() == 4)
+			{
+				score += 1200;
+			}
+
+			while (linesCleared.size() > 0)
+			{
+				decomposedTetrominos = clearRow(decomposedTetrominos, linesCleared[0]);
+				linesCleared.erase(linesCleared.begin());
+			}
 			
+			//Draw filled cells
 			for (int i = 0; i < numColumns; i++)
 			{
 				for (int j = 0; j < numRows; j++)
@@ -896,6 +939,8 @@ int main()
 					}
 				}
 			}
+
+			std::cout << score << std::endl;
 		}
 
 		window.display();
